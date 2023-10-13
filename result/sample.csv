@@ -1,0 +1,17 @@
+No.,chord name,key,degree name,dominant motion,substitute dominant motion,related IIm,conjunct motion,line cliche,passing diminished,pivot chord
+1,C,C major,I,-,-,-,-,-,-,-
+2,A7,C major,V7/?,start,-,?,-,-,-,-
+3,D7,C major,?,continue,-,?,-,-,-,-
+4,G7,C major,V7,continue,-,-,-,-,-,-
+5,C,C major,I,end,-,-,start,-,-,-
+6,G/B,C major,V,-,-,-,continue,-,-,-
+7,Am,C major,VIm,-,-,?,end,start,-,?
+8,A-m,C major,?,-,-,?,-,continue,-,IIm
+9,G-,G- major,I,-,-,-,-,end/start,-,?
+10,Gdim,G- major,?,-,-,?,-,continue,start,-
+11,A-m,G- major,IIm,-,-,start,-,end,end,-
+12,D-7,G- major,V7,start,-,end,-,-,-,-
+13,G-,G- major,I,end,-,-,-,-,-,-
+14,G7,G- major,subV7/I,-,start,?,-,-,-,-
+15,G-,G- major,I,-,end,-,-,-,-,-
+16,G-7,G- major,?,-,-,-,-,-,-,-
