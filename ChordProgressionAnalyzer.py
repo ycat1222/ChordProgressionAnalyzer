@@ -167,10 +167,15 @@ class ChordProgressionAnalyzer:
                     ch.degree_name = "III" + ch.chord_type
 
             # IV, IVM7
+            # IVm, IVm7 (Subdominant Minor)
             elif diff_tonic_root_pitch_class == 5:
                 ch.related_IIm = "-"
                 if ch.chord_type in self.__CHORD_TYPE_MAJOR_IV:
                     ch.degree_name = "IV" + ch.chord_type
+                elif ch.chord_type == "m":
+                    ch.degree_name = "IVm"
+                elif ch.chord_type == "m7":
+                    ch.degree_name = "IVm7"
 
             # V, V7
             elif diff_tonic_root_pitch_class == 7:
@@ -187,13 +192,6 @@ class ChordProgressionAnalyzer:
             elif diff_tonic_root_pitch_class == 11:
                 if ch.chord_type in self.__CHORD_TYPE_MAJOR_VIImb5:
                     ch.degree_name = "VII" + ch.chord_type
-
-            # IVm, IVm7 (Subdominant Minor)
-            elif diff_tonic_root_pitch_class == 5:
-                if ch.chord_type == "m":
-                    ch.degree_name = "IVm"
-                elif ch.chord_type == "m7":
-                    ch.degree_name = "IVm7"
 
             # bVI, bVIM7 (Subdominant Minor)
             elif diff_tonic_root_pitch_class == 8:
