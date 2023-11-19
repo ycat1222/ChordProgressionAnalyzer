@@ -1,5 +1,5 @@
 from MusicXMLAnalyzer import MusicXMLAnalyzer
 
-analyzer = MusicXMLAnalyzer("musicXML\sample.musicxml", "major", "src\setting.ini")
+analyzer = MusicXMLAnalyzer("MusicXML/sample.musicxml", "major", "setting.ini")
 analyzer.analyze()
-analyzer.export_MusicXML("result_sample\sample.musicxml")
+analyzer.export_MusicXML("result/sample.musicxml")
