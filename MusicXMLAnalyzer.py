@@ -344,18 +344,6 @@ class MusicXMLAnalyzer(ChordProgressionAnalyzer):
         measure_no: int = 1
         chord_count: int = 0
 
-        # measure: Measure = self.score.parts[0].measure(3)
-        # text = music21.expressions.TextExpression("Hoge<br>Piyo")
-        # text.placement = "above"
-        # st = text.style
-        # measure.insert(0, text)
-        # st = text.style
-
-        # self.score.write(fmt=".musicxml", fp="TEST.musicxml")
-
-        # text: music21.expressions.TextExpression = measure.getElementsByClass(music21.expressions.TextExpression)[0]
-        # text.content = "Hoge"
-
         while True:
             measure: Measure = self.score.parts[0].measure(measure_no)
             if measure == None:
