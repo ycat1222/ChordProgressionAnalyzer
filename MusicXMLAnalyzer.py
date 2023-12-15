@@ -274,7 +274,7 @@ class MusicXMLAnalyzer(ChordProgressionAnalyzer):
         """ Change key of chord_list \\
         When measures 1 through 8 are in C major and \\
         measures 9 through 16 are in G major, \\
-        change_key(3, Key("G")) will cause measures 3 through 8 to be in G major.
+        change_key(3, Key("G")) will cause measures 3 through 8 to be in G major.\\
         change_key([3, 4, 5], Key("G")) will cause measures 3 through 5 to be in G major.
 
         Parameters
