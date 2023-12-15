@@ -154,60 +154,44 @@ class MusicXMLAnalyzer(ChordProgressionAnalyzer):
 
             # 小説内の全てのNoteを取得する
             # Get all Notes in the measure
-            notes: list[Note] = []
+            all_notes: list[Note] = []
             for ele in flatten_measure:
                 if type(ele) == Chord:
                     for n in ele.notes:
                         n.offset = ele.offset
-                        notes.append(n)
+                        all_notes.append(n)
 
                 elif type(ele) == Note:
-                    notes.append(ele)
+                    all_notes.append(ele)
+
+            if len(all_notes) == 0:
+                continue
 
             # オフセットごとに高い音→低い音の順にソートする
             # Sort from high to low note for each offset
-            notes.sort(key=lambda x: (x.offset, -x.pitch.midi))
+            all_notes.sort(key=lambda x: (x.offset, -x.pitch.midi))
 
-            if len(notes) == 0:
-                continue
+            # 同じオフセットのノートのうち、最高音のみ残す
+            # (和音の場合は最高音のみをメロディーとして扱う)
+            # Keep only the highest note of the notes with the same offset
+            # (In the case of a chord, only the highest note is treated as the melody)
+            prev_offset = -99.0
+            notes: list[Note] = []
+            for n in all_notes:
+                if prev_offset != n.offset:
+                    notes.append(n)
+
+                prev_offset = n.offset
 
             note_index = 0
-            prev_note_offset = notes[0].offset
-            tmp_midi = -1
 
-
-            if chord_index < len(self.chord_list) - 1:
-                # 1小節に含まれるコードが1つだけのとき、
-                # When there is only one chord in a measure,
-                if self.chord_list[chord_index + 1].measure != measure_no:
-                    # 小節最後の音符のオフセットより少し大きな値を次のコードのオフセットとして扱う
-                    # Treat a value slightly larger than the offset of the last note in the measure as the offset of the next chord
-                    next_chord_offset = notes[-1].offset + 1
-                else:
-                    next_chord_offset = self.chord_list[chord_index + 1].chord.offset
-            else:
-                next_chord_offset = notes[-1].offset + 1
-
-            # 各コードの間にあるノートを探し、オフセットが相異なる最も高い音をメロディー構成音として扱う
-            # Find the notes between each chord and treat the highest note with different offsets as the melody note
             while note_index < len(notes):
 
-                # N.C.の場合の処理
-                # Processing for N.C.
-                while ( note_index < len(notes) and
-                        measure_no <= self.chord_list[chord_index].measure and
-                        notes[note_index].offset < self.chord_list[chord_index].chord.offset):
-
-                    # 最高音を探す
-                    # Find the highest note
-                    while note_index < len(notes) and prev_note_offset == notes[note_index].offset:
-
-                        if tmp_midi < notes[note_index].pitch.midi:
-                            tmp_midi = notes[note_index].pitch.midi
-                            melody_note = AnalyzedNote(note=notes[note_index], chord=None, key=self.modulation_list[measure_no])
-
-                        prev_note_offset = notes[note_index].offset
-                        note_index += 1
+                # 最後のコードよりも後にノートがある場合 (N.C.の場合の処理)
+                # If there is a note after the last chord
+                if chord_index > len(self.chord_list) - 1:
+                    melody_note = AnalyzedNote(note=notes[note_index], chord=None, key=self.modulation_list[measure_no])
+                    note_index += 1
 
                     if self.setting["print_analyzed_melody"]:
                         note_text_exp = music21.expressions.TextExpression(
@@ -216,28 +200,43 @@ class MusicXMLAnalyzer(ChordProgressionAnalyzer):
                         measure.insert(melody_note.note.offset, note_text_exp)
                     self.note_list.append(melody_note)
 
-                    tmp_midi = -1
-                    if note_index >= len(notes):
-                        break
-                    prev_note_offset = notes[note_index].offset
+
+                # その小節にコードが1つもないが、ノートはある場合 (N.C.の場合の処理)
+                # There is no chord in the measure, but there is a note
+                elif measure_no != self.chord_list[chord_index].measure:
+
+                    melody_note = AnalyzedNote(note=notes[note_index], chord=None, key=self.modulation_list[measure_no])
+                    note_index += 1
+
+                    if self.setting["print_analyzed_melody"]:
+                        note_text_exp = music21.expressions.TextExpression(
+                            f"{melody_note.interval_from_tonic}/{melody_note.interval_from_root}")
+                        note_text_exp.placement = "below"
+                        measure.insert(melody_note.note.offset, note_text_exp)
+                    self.note_list.append(melody_note)
+
+                # 小節内にコードがあるが、そのコードの前にノートがある場合 (N.C.の場合の処理)
+                # There is a chord in the measure, but there is a note before the chord
+                elif (  measure_no == self.chord_list[chord_index].measure and
+                        notes[note_index].offset < self.chord_list[chord_index].chord.offset):
+
+                    melody_note = AnalyzedNote(note=notes[note_index], chord=None, key=self.modulation_list[measure_no])
+                    note_index += 1
+
+                    if self.setting["print_analyzed_melody"]:
+                        note_text_exp = music21.expressions.TextExpression(
+                            f"{melody_note.interval_from_tonic}/{melody_note.interval_from_root}")
+                        note_text_exp.placement = "below"
+                        measure.insert(melody_note.note.offset, note_text_exp)
+                    self.note_list.append(melody_note)
 
                 # 今のコードと次のコードの間にある場合のノートについて調べる
                 # Look at the notes between the current chord and the next chord
-                while ( note_index < len(notes) and
-                        notes[note_index].offset >= self.chord_list[chord_index].chord.offset and
-                        notes[note_index].offset <  next_chord_offset):
+                elif (  measure_no == self.chord_list[chord_index].measure and
+                        notes[note_index].offset >= self.chord_list[chord_index].chord.offset):
 
-                    # この処理は1つのoffsetごとに、必ず1回は実行される
-                    # This process is executed at least once for each offset
-                    while note_index < len(notes) and prev_note_offset == notes[note_index].offset:
-                        # 最高音を探す
-                        # Find the highest note
-                        if tmp_midi < notes[note_index].pitch.midi:
-                            tmp_midi = notes[note_index].pitch.midi
-                            melody_note = AnalyzedNote(note=notes[note_index], chord=self.chord_list[chord_index])
-
-                        prev_note_offset = notes[note_index].offset
-                        note_index += 1
+                    melody_note = AnalyzedNote(note=notes[note_index], chord=self.chord_list[chord_index])
+                    note_index += 1
 
                     if self.setting["print_analyzed_melody"]:
                         note_text_exp = music21.expressions.TextExpression(
@@ -246,25 +245,19 @@ class MusicXMLAnalyzer(ChordProgressionAnalyzer):
                         measure.insert(melody_note.note.offset, note_text_exp)
                     self.note_list.append(melody_note)
 
-                    tmp_midi = -1
-                    if note_index >= len(notes):
-                        break
-                    prev_note_offset = notes[note_index].offset
-
-                chord_index += 1
-                # 1小節に含まれるコードが1つだけのとき、
-                # When there is only one chord in a measure,
                 if chord_index < len(self.chord_list) - 1:
-                    if self.chord_list[chord_index + 1].measure != measure_no:
-                        # 小節最後の音符のオフセットより少し大きな値を次のコードのオフセットとして扱う
-                        # Treat a value slightly larger than the offset of the last note in the measure as the offset of the next chord
-                        next_chord_offset = notes[-1].offset + 1
-                    else:
-                        next_chord_offset = self.chord_list[chord_index + 1].chord.offset
-                else:
-                    # chord_listの末尾の場合の処理
-                    # Processing for the end of chord_list
-                    next_chord_offset = notes[-1].offset + 1
+                    # その小説内の全てのノートの処理が終わった場合、小節が変わるため次のコードに進める
+                    # If all the notes in the measure have been processed, the measure changes, so proceed to the next chord
+                    if note_index >= len(notes):
+                        chord_index += 1
+
+                    # 次のノート(上記の処理で+1されているため)が現在のコードのオフセットと同じか大きい場合
+                    # If the next note (which has been +1 in the above process) is the same as or greater than the offset of the current chord
+                    elif (  measure_no == self.chord_list[chord_index + 1].measure and
+                            notes[note_index].offset >= self.chord_list[chord_index + 1].chord.offset):
+                        # コードを次に進める
+                        # Proceed to the next chord
+                        chord_index += 1
 
         return chord_result, self.note_list
 
