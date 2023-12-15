@@ -31,7 +31,7 @@ class MusicXMLAnalyzer(ChordProgressionAnalyzer):
         "substitute_dominant_motion_continue": "-->",
         "substitute_dominant_motion_end": "",
         "conjunct_motion_start": "conjunct->",
-        "conjunct_continue": "-conjunct->",
+        "conjunct_motion_continue": "-conjunct->",
         "conjunct_motion_end": "->conjunct",
         "line_cliche_start": "cliche->",
         "line_cliche_continue": "-cliche->",
