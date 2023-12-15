@@ -447,8 +447,8 @@ class MusicXMLAnalyzer(ChordProgressionAnalyzer):
 
 
 if __name__ == "__main__":
-    analyzer = MusicXMLAnalyzer("musicXML\sample.musicxml", "major", "src\setting.ini")
+    analyzer = MusicXMLAnalyzer("musicXML/sample.musicxml", "major", "setting.ini")
     analyzer.analyze()
-    analyzer.export_MusicXML("result_sample/sample.musicxml")
-    analyzer.export_csv("result_sample/sample.csv")
+    analyzer.export_MusicXML("result/sample.musicxml")
+    analyzer.export_csv("result/sample.csv")
 
