@@ -246,9 +246,11 @@ class MusicXMLAnalyzer(ChordProgressionAnalyzer):
                     self.note_list.append(melody_note)
 
                 if chord_index < len(self.chord_list) - 1:
-                    # その小説内の全てのノートの処理が終わった場合、小節が変わるため次のコードに進める
-                    # If all the notes in the measure have been processed, the measure changes, so proceed to the next chord
-                    if note_index >= len(notes):
+                    # その小節内の全てのノートの処理が終わった場合、小節が変わるため次のコードに進める
+                    # ただし、その小節の中にコードがない場合は次のコードへは進めない (その小節の中にコードがあるときのみコードを次へ進める)
+                    # If all the notes in the measure have been processed, the measure changes, so proceed to the next chord.
+                    # However, if there is no chord in the measure, do not proceed to the next chord (only proceed to the next chord when there is a chord in the measure)
+                    if note_index >= len(notes) and measure_no == self.chord_list[chord_index].measure:
                         chord_index += 1
 
                     # 次のノート(上記の処理で+1されているため)が現在のコードのオフセットと同じか大きい場合
